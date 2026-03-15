@@ -321,4 +321,4 @@ Potential upgrades:
 
 ## License
 
-MIT License
+[MIT License](LICENSE)
