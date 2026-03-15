@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { FiltersPanel } from "../../components/FiltersPanel";
-import { VIEW_MODES } from "../../utils/jobSelectors";
 
 const mockJobs = [
   {
@@ -29,7 +28,7 @@ const mockJobs = [
   },
 ];
 
-const baseFilters = { searchQuery: "", company: "", location: "", tags: [] };
+const baseFilters = { searchQuery: "", company: [], location: [], tags: [] };
 
 function renderPanel(props = {}) {
   return render(
@@ -94,22 +93,32 @@ describe("FiltersPanel", () => {
 
   describe("active state", () => {
     it('active company chip has "active" class', () => {
-      renderPanel({ filters: { ...baseFilters, company: "Acme" } });
+      renderPanel({ filters: { ...baseFilters, company: ["Acme"] } });
       expect(screen.getByRole("button", { name: "Acme" })).toHaveClass(
         "active",
       );
     });
 
     it('inactive company chips do not have "active" class', () => {
-      renderPanel({ filters: { ...baseFilters, company: "Acme" } });
+      renderPanel({ filters: { ...baseFilters, company: ["Acme"] } });
       expect(screen.getByRole("button", { name: "Beta" })).not.toHaveClass(
         "active",
       );
     });
 
     it('active location chip has "active" class', () => {
-      renderPanel({ filters: { ...baseFilters, location: "Remote" } });
+      renderPanel({ filters: { ...baseFilters, location: ["Remote"] } });
       expect(screen.getByRole("button", { name: "Remote" })).toHaveClass(
+        "active",
+      );
+    });
+
+    it("supports multiple active company chips", () => {
+      renderPanel({ filters: { ...baseFilters, company: ["Acme", "Beta"] } });
+      expect(screen.getByRole("button", { name: "Acme" })).toHaveClass(
+        "active",
+      );
+      expect(screen.getByRole("button", { name: "Beta" })).toHaveClass(
         "active",
       );
     });

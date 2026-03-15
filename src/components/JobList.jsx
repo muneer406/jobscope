@@ -1,4 +1,3 @@
-import { useJobs } from "../hooks/useJobs";
 import { VIEW_MODES } from "../utils/jobSelectors";
 import { JobCard } from "./JobCard";
 
@@ -33,13 +32,12 @@ function EmptyState({ viewMode }) {
 export function JobList({
   isLoading,
   jobs,
+  onSelectJob,
   onToggleSavedJob,
   savedJobs,
   selectedJobId,
   viewMode,
 }) {
-  const { selectJob } = useJobs();
-
   if (isLoading) {
     return <LoadingState />;
   }
@@ -56,11 +54,11 @@ export function JobList({
           className="job-list-item"
           role="button"
           tabIndex={0}
-          onClick={() => selectJob(job.id)}
+          onClick={() => onSelectJob(job.id)}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
-              selectJob(job.id);
+              onSelectJob(job.id);
             }
           }}
         >

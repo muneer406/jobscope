@@ -5,13 +5,6 @@ import { describe, expect, it, vi } from "vitest";
 import { JobList } from "../../components/JobList";
 import { VIEW_MODES } from "../../utils/jobSelectors";
 
-// JobList calls useJobs internally for selectJob — mock at the module level.
-const mockSelectJob = vi.fn();
-
-vi.mock("../../hooks/useJobs", () => ({
-  useJobs: () => ({ selectJob: mockSelectJob }),
-}));
-
 const mockJobs = [
   {
     id: 1,
@@ -36,6 +29,7 @@ function renderList(props = {}) {
     <JobList
       isLoading={false}
       jobs={mockJobs}
+      onSelectJob={vi.fn()}
       savedJobs={[]}
       selectedJobId={null}
       viewMode={VIEW_MODES.ALL}
@@ -91,28 +85,29 @@ describe("JobList", () => {
 
   describe("job selection", () => {
     it("calls selectJob when a card row is clicked", async () => {
-      renderList();
-      const rows = screen.getAllByRole("button");
-      // The first row-level div has role="button"
-      const cardRow = rows.find((el) => el.className.includes("job-list-item"));
+      const onSelectJob = vi.fn();
+      renderList({ onSelectJob });
+      const [cardRow] = document.querySelectorAll(".job-list-item");
       await userEvent.click(cardRow);
-      expect(mockSelectJob).toHaveBeenCalled();
+      expect(onSelectJob).toHaveBeenCalledWith(mockJobs[0].id);
     });
 
     it("calls selectJob with the correct job id on keyboard Enter", async () => {
-      renderList();
+      const onSelectJob = vi.fn();
+      renderList({ onSelectJob });
       const cardRows = document.querySelectorAll(".job-list-item");
       cardRows[0].focus();
       await userEvent.keyboard("{Enter}");
-      expect(mockSelectJob).toHaveBeenCalledWith(mockJobs[0].id);
+      expect(onSelectJob).toHaveBeenCalledWith(mockJobs[0].id);
     });
 
     it("calls selectJob with the correct job id on keyboard Space", async () => {
-      renderList();
+      const onSelectJob = vi.fn();
+      renderList({ onSelectJob });
       const cardRows = document.querySelectorAll(".job-list-item");
       cardRows[0].focus();
       await userEvent.keyboard(" ");
-      expect(mockSelectJob).toHaveBeenCalledWith(mockJobs[0].id);
+      expect(onSelectJob).toHaveBeenCalledWith(mockJobs[0].id);
     });
   });
 });

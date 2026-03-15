@@ -2,15 +2,18 @@ import { createContext, useEffect, useState } from "react";
 
 import { fetchJobs } from "../api/jobs";
 import {
+  getPaginatedJobs,
   getSelectedJob,
+  getTotalPages,
   getVisibleJobs,
+  JOBS_PER_PAGE,
   VIEW_MODES,
 } from "../utils/jobSelectors";
 
 const INITIAL_FILTERS = {
   searchQuery: "",
-  company: "",
-  location: "",
+  company: [],
+  location: [],
   tags: [],
 };
 
@@ -22,6 +25,7 @@ export function JobsProvider({ children }) {
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [viewMode, setViewMode] = useState(VIEW_MODES.ALL);
   const [selectedJobId, setSelectedJobId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -32,10 +36,14 @@ export function JobsProvider({ children }) {
     viewMode,
   });
 
-  const selectedJob =
-    visibleJobs.length > 0
-      ? (getSelectedJob(visibleJobs, selectedJobId) ?? visibleJobs[0])
-      : null;
+  const totalPages = getTotalPages(visibleJobs.length, JOBS_PER_PAGE);
+  const paginatedJobs = getPaginatedJobs(
+    visibleJobs,
+    currentPage,
+    JOBS_PER_PAGE,
+  );
+
+  const selectedJob = getSelectedJob(visibleJobs, selectedJobId);
 
   useEffect(() => {
     let isActive = true;
@@ -52,10 +60,6 @@ export function JobsProvider({ children }) {
         }
 
         setJobs(nextJobs);
-        setSelectedJobId(
-          (currentSelectedJobId) =>
-            currentSelectedJobId ?? nextJobs[0]?.id ?? null,
-        );
       } catch (loadError) {
         if (!isActive) {
           return;
@@ -77,7 +81,7 @@ export function JobsProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (visibleJobs.length === 0) {
+    if (selectedJobId === null) {
       return;
     }
 
@@ -86,9 +90,19 @@ export function JobsProvider({ children }) {
     );
 
     if (!hasSelectedVisibleJob) {
-      setSelectedJobId(visibleJobs[0].id);
+      setSelectedJobId(null);
     }
   }, [selectedJobId, visibleJobs]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, viewMode]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   function updateSearchQuery(searchQuery) {
     setFilters((currentFilters) => ({
@@ -105,17 +119,29 @@ export function JobsProvider({ children }) {
   }
 
   function updateCompanyFilter(company) {
-    setFilters((currentFilters) => ({
-      ...currentFilters,
-      company: currentFilters.company === company ? "" : company,
-    }));
+    setFilters((currentFilters) => {
+      const isSelected = currentFilters.company.includes(company);
+
+      return {
+        ...currentFilters,
+        company: isSelected
+          ? currentFilters.company.filter((value) => value !== company)
+          : [...currentFilters.company, company],
+      };
+    });
   }
 
   function updateLocationFilter(location) {
-    setFilters((currentFilters) => ({
-      ...currentFilters,
-      location: currentFilters.location === location ? "" : location,
-    }));
+    setFilters((currentFilters) => {
+      const isSelected = currentFilters.location.includes(location);
+
+      return {
+        ...currentFilters,
+        location: isSelected
+          ? currentFilters.location.filter((value) => value !== location)
+          : [...currentFilters.location, location],
+      };
+    });
   }
 
   function toggleTagFilter(tag) {
@@ -136,8 +162,8 @@ export function JobsProvider({ children }) {
 
   const hasActiveFilters =
     filters.searchQuery !== "" ||
-    filters.company !== "" ||
-    filters.location !== "" ||
+    filters.company.length > 0 ||
+    filters.location.length > 0 ||
     filters.tags.length > 0;
 
   function toggleSavedJob(jobId) {
@@ -154,12 +180,29 @@ export function JobsProvider({ children }) {
     setSelectedJobId(jobId);
   }
 
+  function clearSelectedJob() {
+    setSelectedJobId(null);
+  }
+
   function showAllJobs() {
     setViewMode(VIEW_MODES.ALL);
   }
 
   function showSavedJobs() {
     setViewMode(VIEW_MODES.SAVED);
+  }
+
+  function goToPage(pageNumber) {
+    const safePage = Math.min(Math.max(1, pageNumber), totalPages);
+    setCurrentPage(safePage);
+  }
+
+  function goToNextPage() {
+    setCurrentPage((page) => Math.min(page + 1, totalPages));
+  }
+
+  function goToPreviousPage() {
+    setCurrentPage((page) => Math.max(page - 1, 1));
   }
 
   function toggleViewMode() {
@@ -175,10 +218,6 @@ export function JobsProvider({ children }) {
     try {
       const nextJobs = await fetchJobs();
       setJobs(nextJobs);
-      setSelectedJobId(
-        (currentSelectedJobId) =>
-          currentSelectedJobId ?? nextJobs[0]?.id ?? null,
-      );
     } catch (loadError) {
       setError(loadError.message || "Unable to load job listings.");
     } finally {
@@ -195,6 +234,9 @@ export function JobsProvider({ children }) {
         viewMode,
         selectedJob,
         visibleJobs,
+        paginatedJobs,
+        currentPage,
+        totalPages,
         isLoading,
         error,
         updateSearchQuery,
@@ -206,8 +248,12 @@ export function JobsProvider({ children }) {
         hasActiveFilters,
         toggleSavedJob,
         selectJob,
+        clearSelectedJob,
         showAllJobs,
         showSavedJobs,
+        goToPage,
+        goToNextPage,
+        goToPreviousPage,
         toggleViewMode,
         refreshJobs,
       }}

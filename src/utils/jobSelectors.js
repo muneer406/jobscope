@@ -3,6 +3,8 @@ export const VIEW_MODES = {
     SAVED: 'saved',
 };
 
+export const JOBS_PER_PAGE = 6;
+
 function normalizeQuery(value) {
     return String(value ?? '').trim().toLowerCase();
 }
@@ -17,8 +19,8 @@ export function getSelectedJob(jobs, selectedJobId) {
 
 export function getVisibleJobs({ jobs, savedJobs, filters, viewMode }) {
     const searchQuery = normalizeQuery(filters?.searchQuery);
-    const company = normalizeQuery(filters?.company);
-    const location = normalizeQuery(filters?.location);
+    const companies = (filters?.company ?? []).map(normalizeQuery).filter(Boolean);
+    const locations = (filters?.location ?? []).map(normalizeQuery).filter(Boolean);
     const tags = filters?.tags ?? [];
 
     return jobs.filter(job => {
@@ -28,11 +30,11 @@ export function getVisibleJobs({ jobs, savedJobs, filters, viewMode }) {
         const matchesSearch = searchQuery
             ? job.title.toLowerCase().includes(searchQuery)
             : true;
-        const matchesCompany = company
-            ? job.company.toLowerCase() === company
+        const matchesCompany = companies.length > 0
+            ? companies.includes(job.company.toLowerCase())
             : true;
-        const matchesLocation = location
-            ? job.location.toLowerCase() === location
+        const matchesLocation = locations.length > 0
+            ? locations.includes(job.location.toLowerCase())
             : true;
         const matchesTags = tags.length > 0
             ? tags.some(tag => job.tags.includes(tag))
@@ -40,6 +42,21 @@ export function getVisibleJobs({ jobs, savedJobs, filters, viewMode }) {
 
         return matchesView && matchesSearch && matchesCompany && matchesLocation && matchesTags;
     });
+}
+
+export function getTotalPages(totalJobs, jobsPerPage = JOBS_PER_PAGE) {
+    if (totalJobs <= 0) {
+        return 1;
+    }
+
+    return Math.ceil(totalJobs / jobsPerPage);
+}
+
+export function getPaginatedJobs(jobs, currentPage, jobsPerPage = JOBS_PER_PAGE) {
+    const safePage = Math.max(1, currentPage);
+    const startIndex = (safePage - 1) * jobsPerPage;
+
+    return jobs.slice(startIndex, startIndex + jobsPerPage);
 }
 
 export function getUniqueCompanies(jobs) {

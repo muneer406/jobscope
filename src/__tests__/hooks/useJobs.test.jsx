@@ -175,10 +175,13 @@ function FilterContext() {
   return (
     <div>
       <span data-testid="count">{ctx.visibleJobs.length}</span>
-      <span data-testid="company">{ctx.filters.company}</span>
-      <span data-testid="location">{ctx.filters.location}</span>
+      <span data-testid="pageCount">{ctx.paginatedJobs.length}</span>
+      <span data-testid="company">{JSON.stringify(ctx.filters.company)}</span>
+      <span data-testid="location">{JSON.stringify(ctx.filters.location)}</span>
       <span data-testid="tags">{JSON.stringify(ctx.filters.tags)}</span>
       <span data-testid="hasActive">{String(ctx.hasActiveFilters)}</span>
+      <span data-testid="currentPage">{ctx.currentPage}</span>
+      <span data-testid="selectedJob">{String(ctx.selectedJob?.id ?? "")}</span>
       <button onClick={() => ctx.updateCompanyFilter("Acme")}>set acme</button>
       <button onClick={() => ctx.updateCompanyFilter("Beta")}>set beta</button>
       <button onClick={() => ctx.updateLocationFilter("Remote")}>
@@ -189,6 +192,9 @@ function FilterContext() {
       </button>
       <button onClick={() => ctx.toggleTagFilter("react")}>toggle react</button>
       <button onClick={() => ctx.toggleTagFilter("node")}>toggle node</button>
+      <button onClick={() => ctx.selectJob(1)}>select 1</button>
+      <button onClick={() => ctx.clearSelectedJob()}>clear selected</button>
+      <button onClick={() => ctx.goToPage(2)}>page 2</button>
       <button onClick={() => ctx.clearAllFilters()}>clear all</button>
     </div>
   );
@@ -223,33 +229,43 @@ describe("useJobs — Phase 2 filter actions", () => {
   it("updateCompanyFilter sets the company filter", async () => {
     await setup();
     await userEvent.click(screen.getByRole("button", { name: "set acme" }));
-    expect(screen.getByTestId("company").textContent).toBe("Acme");
+    expect(screen.getByTestId("company").textContent).toBe('["Acme"]');
   });
 
   it("updateCompanyFilter called again with same value clears it", async () => {
     await setup();
     await userEvent.click(screen.getByRole("button", { name: "set acme" }));
     await userEvent.click(screen.getByRole("button", { name: "set acme" }));
-    expect(screen.getByTestId("company").textContent).toBe("");
+    expect(screen.getByTestId("company").textContent).toBe("[]");
   });
 
-  it("updateCompanyFilter filters visible jobs", async () => {
+  it("updateCompanyFilter adds another company without removing the first", async () => {
     await setup();
     await userEvent.click(screen.getByRole("button", { name: "set acme" }));
-    expect(screen.getByTestId("count").textContent).toBe("1");
+    await userEvent.click(screen.getByRole("button", { name: "set beta" }));
+    expect(screen.getByTestId("company").textContent).toBe('["Acme","Beta"]');
   });
 
   it("updateLocationFilter sets the location filter", async () => {
     await setup();
     await userEvent.click(screen.getByRole("button", { name: "set remote" }));
-    expect(screen.getByTestId("location").textContent).toBe("Remote");
+    expect(screen.getByTestId("location").textContent).toBe('["Remote"]');
   });
 
   it("updateLocationFilter called again with same value clears it", async () => {
     await setup();
     await userEvent.click(screen.getByRole("button", { name: "set remote" }));
     await userEvent.click(screen.getByRole("button", { name: "set remote" }));
-    expect(screen.getByTestId("location").textContent).toBe("");
+    expect(screen.getByTestId("location").textContent).toBe("[]");
+  });
+
+  it("updateLocationFilter supports multiple selected locations", async () => {
+    await setup();
+    await userEvent.click(screen.getByRole("button", { name: "set remote" }));
+    await userEvent.click(screen.getByRole("button", { name: "set berlin" }));
+    expect(screen.getByTestId("location").textContent).toBe(
+      '["Remote","Berlin"]',
+    );
   });
 
   it("toggleTagFilter adds tag to the array", async () => {
@@ -284,8 +300,8 @@ describe("useJobs — Phase 2 filter actions", () => {
     await userEvent.click(screen.getByRole("button", { name: "set remote" }));
     await userEvent.click(screen.getByRole("button", { name: "toggle react" }));
     await userEvent.click(screen.getByRole("button", { name: "clear all" }));
-    expect(screen.getByTestId("company").textContent).toBe("");
-    expect(screen.getByTestId("location").textContent).toBe("");
+    expect(screen.getByTestId("company").textContent).toBe("[]");
+    expect(screen.getByTestId("location").textContent).toBe("[]");
     expect(screen.getByTestId("tags").textContent).toBe("[]");
   });
 
@@ -294,5 +310,21 @@ describe("useJobs — Phase 2 filter actions", () => {
     await userEvent.click(screen.getByRole("button", { name: "set acme" }));
     await userEvent.click(screen.getByRole("button", { name: "clear all" }));
     expect(screen.getByTestId("hasActive").textContent).toBe("false");
+  });
+
+  it("clearSelectedJob removes the current selection", async () => {
+    await setup();
+    await userEvent.click(screen.getByRole("button", { name: "select 1" }));
+    expect(screen.getByTestId("selectedJob").textContent).toBe("1");
+    await userEvent.click(
+      screen.getByRole("button", { name: "clear selected" }),
+    );
+    expect(screen.getByTestId("selectedJob").textContent).toBe("");
+  });
+
+  it("clearAllFilters resets pagination back to the first page", async () => {
+    await setup();
+    await userEvent.click(screen.getByRole("button", { name: "page 2" }));
+    expect(screen.getByTestId("currentPage").textContent).toBe("1");
   });
 });

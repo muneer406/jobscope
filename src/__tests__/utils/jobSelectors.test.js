@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+    getPaginatedJobs,
     getSelectedJob,
+    getTotalPages,
     getUniqueCompanies,
     getUniqueLocations,
     getUniqueTags,
+    JOBS_PER_PAGE,
     getVisibleJobs,
     isSavedJob,
     VIEW_MODES,
@@ -128,17 +131,27 @@ describe('getVisibleJobs', () => {
             const result = getVisibleJobs({
                 jobs,
                 savedJobs: [],
-                filters: { company: 'acme' },
+                filters: { company: ['acme'] },
                 viewMode: VIEW_MODES.ALL,
             });
             expect(result.map((j) => j.id)).toEqual([1]);
+        });
+
+        it('returns jobs matching any selected company', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { company: ['acme', 'beta'] },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result.map((j) => j.id)).toEqual([1, 2]);
         });
 
         it('returns all jobs when company filter is empty', () => {
             const result = getVisibleJobs({
                 jobs,
                 savedJobs: [],
-                filters: { company: '' },
+                filters: { company: [] },
                 viewMode: VIEW_MODES.ALL,
             });
             expect(result).toHaveLength(3);
@@ -150,7 +163,7 @@ describe('getVisibleJobs', () => {
             const result = getVisibleJobs({
                 jobs,
                 savedJobs: [],
-                filters: { location: 'berlin' },
+                filters: { location: ['berlin'] },
                 viewMode: VIEW_MODES.ALL,
             });
             expect(result.map((j) => j.id)).toEqual([2]);
@@ -160,10 +173,20 @@ describe('getVisibleJobs', () => {
             const result = getVisibleJobs({
                 jobs,
                 savedJobs: [],
-                filters: { location: 'remote' },
+                filters: { location: ['remote'] },
                 viewMode: VIEW_MODES.ALL,
             });
             expect(result.map((j) => j.id)).toEqual([1, 3]);
+        });
+
+        it('returns jobs matching any selected location', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { location: ['remote', 'berlin'] },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result.map((j) => j.id)).toEqual([1, 2, 3]);
         });
     });
 
@@ -204,7 +227,7 @@ describe('getVisibleJobs', () => {
             const result = getVisibleJobs({
                 jobs,
                 savedJobs: [],
-                filters: { company: 'acme', location: 'remote' },
+                filters: { company: ['acme'], location: ['remote'] },
                 viewMode: VIEW_MODES.ALL,
             });
             expect(result.map((j) => j.id)).toEqual([1]);
@@ -214,7 +237,7 @@ describe('getVisibleJobs', () => {
             const result = getVisibleJobs({
                 jobs,
                 savedJobs: [],
-                filters: { company: 'acme', location: 'berlin' },
+                filters: { company: ['acme'], location: ['berlin'] },
                 viewMode: VIEW_MODES.ALL,
             });
             expect(result).toHaveLength(0);
@@ -265,5 +288,30 @@ describe('getUniqueTags', () => {
 
     it('returns an empty array for empty input', () => {
         expect(getUniqueTags([])).toEqual([]);
+    });
+});
+
+describe('pagination helpers', () => {
+    it('exposes a jobs per page constant', () => {
+        expect(JOBS_PER_PAGE).toBe(6);
+    });
+
+    it('computes total pages for a filtered result set', () => {
+        expect(getTotalPages(13, 6)).toBe(3);
+    });
+
+    it('returns 1 page when there are no jobs', () => {
+        expect(getTotalPages(0, 6)).toBe(1);
+    });
+
+    it('returns only the jobs for the requested page', () => {
+        const result = getPaginatedJobs([
+            ...jobs,
+            { ...jobs[0], id: 4 },
+            { ...jobs[0], id: 5 },
+            { ...jobs[0], id: 6 },
+            { ...jobs[0], id: 7 },
+        ], 2, 3);
+        expect(result.map((job) => job.id)).toEqual([4, 5, 6]);
     });
 });

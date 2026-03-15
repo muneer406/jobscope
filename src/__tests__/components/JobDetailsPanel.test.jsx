@@ -18,6 +18,8 @@ function renderPanel(props = {}) {
     <JobDetailsPanel
       isSaved={false}
       job={mockJob}
+      onBackToResults={vi.fn()}
+      onClearSelection={vi.fn()}
       onToggleSavedJob={vi.fn()}
       {...props}
     />,
@@ -48,7 +50,9 @@ describe("JobDetailsPanel", () => {
 
   it('shows "Save Job" when the job is not saved', () => {
     renderPanel({ isSaved: false });
-    expect(screen.getByRole("button", { name: "Save Job" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Save Job" }),
+    ).toBeInTheDocument();
   });
 
   it('shows "Saved" when the job is already saved', () => {
@@ -61,6 +65,24 @@ describe("JobDetailsPanel", () => {
     renderPanel({ onToggleSavedJob });
     await userEvent.click(screen.getByRole("button", { name: "Save Job" }));
     expect(onToggleSavedJob).toHaveBeenCalledWith(mockJob.id);
+  });
+
+  it("calls onBackToResults when the back button is clicked", async () => {
+    const onBackToResults = vi.fn();
+    renderPanel({ onBackToResults });
+    await userEvent.click(
+      screen.getByRole("button", { name: /back to results/i }),
+    );
+    expect(onBackToResults).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onClearSelection when clear selection is clicked", async () => {
+    const onClearSelection = vi.fn();
+    renderPanel({ onClearSelection });
+    await userEvent.click(
+      screen.getByRole("button", { name: /clear selection/i }),
+    );
+    expect(onClearSelection).toHaveBeenCalledTimes(1);
   });
 
   it("renders an empty state when no job is selected", () => {

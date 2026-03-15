@@ -4,7 +4,7 @@ import {
   getUniqueTags,
 } from "../utils/jobSelectors";
 
-function FilterGroup({ label, items, activeItem, onToggle }) {
+function FilterGroup({ label, items, activeItems, onToggle }) {
   if (items.length === 0) return null;
 
   return (
@@ -16,7 +16,7 @@ function FilterGroup({ label, items, activeItem, onToggle }) {
             key={item}
             type="button"
             className={
-              activeItem === item ? "filter-chip active" : "filter-chip"
+              activeItems.includes(item) ? "filter-chip active" : "filter-chip"
             }
             onClick={() => onToggle(item)}
           >
@@ -83,14 +83,14 @@ export function FiltersPanel({
       <FilterGroup
         label="Company"
         items={companies}
-        activeItem={filters.company}
+        activeItems={filters.company}
         onToggle={onToggleCompany}
       />
 
       <FilterGroup
         label="Location"
         items={locations}
-        activeItem={filters.location}
+        activeItems={filters.location}
         onToggle={onToggleLocation}
       />
 

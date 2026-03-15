@@ -2,7 +2,7 @@
 
 ![React](https://img.shields.io/badge/React-19-blue)
 ![Vite](https://img.shields.io/badge/Vite-7-purple)
-![Tests](https://img.shields.io/badge/tests-121%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-138%20passing-brightgreen)
 ![Phase](https://img.shields.io/badge/phase-3%20complete-success)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -20,16 +20,16 @@ Unlike traditional job boards centered around endless scrolling, **JobScope prio
 - Search jobs by title
 - Save jobs for later
 - Toggle between **All Jobs** and **Saved Jobs**
-- Job detail inspection panel
+- Switch between **Results** and **Details** views
+- Job detail inspection panel with clear-selection flow
+- Client-side pagination for filtered results
 - Loading and empty UI states
+- Footer with product and data-source context
 
 ### Discovery & Filtering
 
 - Multi-filter system
-- Filter by:
-  - company
-  - location
-  - tags
+- Multi-select filters for company, location, and tags
 - Clear filters instantly
 
 ### Productivity Enhancements
@@ -94,6 +94,7 @@ src
 │   ├── JobCard.jsx
 │   ├── JobDetailsPanel.jsx
 │   ├── JobList.jsx
+│   ├── Pagination.jsx
 │   ├── SearchBar.jsx
 │   └── ViewToggle.jsx
 │
@@ -178,11 +179,11 @@ Layout structure:
 
 ```
 
-| Job List | Job Details |
+| Sidebar | Results / Details panel |
 
 ```
 
-This allows users to **quickly scan and inspect jobs without losing context**.
+This allows users to **filter broadly, browse results cleanly, and inspect a single job without crowding the page**.
 
 ---
 
@@ -196,18 +197,26 @@ This allows users to **quickly scan and inspect jobs without losing context**.
 
 ### ✅ Phase 2 — Advanced filtering
 
-- Filter by company, location, and tags (OR logic)
-- `FiltersPanel` with single-select company / location chips and multi-select tag chips
-- Toggle behaviour: clicking an active filter clears it
+- Multi-select filters for company, location, and tags (OR logic within each group)
+- `FiltersPanel` with chip-based filter groups across all filter types
+- Toggle behaviour: clicking an active chip removes it from the current filter set
 - "Clear all" button when any filter is active
 - `hasActiveFilters` derived state
 
 ### ✅ Phase 3 — Job detail panel
 
-- Dedicated detail panel for the currently selected job
+- Dedicated detail view for the currently selected job
 - Shows full description, company, location, and tags
 - Save or unsave directly from the detail view
+- Clear selection and return to results cleanly
 - Handles loading and empty-selection states cleanly
+
+### Added UX improvements
+
+- Results/details tab workflow to reduce visual clutter
+- Client-side pagination for filtered results
+- Responsive single-panel content area across desktop and mobile
+- Footer section for product framing and data-source disclosure
 
 ### Phase 4 — Keyboard navigation system
 
@@ -246,7 +255,7 @@ npm test          # run once
 npm run test:watch # watch mode
 ```
 
-121 tests across 9 suites covering the API mapper, selectors, components, hooks, and filter actions.
+138 tests across 10 suites covering the API mapper, selectors, components, hooks, pagination, and filter actions.
 
 ---
 
