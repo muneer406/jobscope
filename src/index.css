@@ -267,6 +267,34 @@ button {
   font-weight: 700;
 }
 
+.results-meta-stack {
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+}
+
+.sort-controls {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+  font-weight: 700;
+}
+
+.sort-controls span {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sort-controls select {
+  min-width: 190px;
+  padding: 10px 12px;
+  border: 2px solid #161616;
+  background: #fff;
+  font: inherit;
+  font-weight: 700;
+}
+
 .job-list-item {
   padding: 0;
   border: 0;
@@ -362,6 +390,109 @@ button {
 .feedback-panel {
   margin-top: 22px;
   padding: 28px;
+}
+
+.intelligence-panel {
+  margin-top: 22px;
+  padding: 18px;
+  border: 3px solid #161616;
+  background: #fffaf0;
+  box-shadow: 6px 6px 0 #161616;
+}
+
+.insight-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.insight-stat-card {
+  padding: 12px;
+  border: 2px solid #161616;
+  background: #fff;
+}
+
+.insight-stat-card strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.35rem;
+}
+
+.intelligence-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.insight-block {
+  margin-top: 14px;
+}
+
+.insight-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.insight-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 2px solid #161616;
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+.intelligence-empty {
+  margin: 10px 0 0;
+  color: #555;
+}
+
+.recommendation-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.recommendation-card {
+  padding: 14px;
+  border: 2px solid #161616;
+  background: #fff;
+  display: grid;
+  gap: 12px;
+}
+
+.recommendation-company {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.recommendation-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.recommendation-meta {
+  margin: 8px 0 0;
+  color: #444;
+  font-size: 0.88rem;
+}
+
+.recommendation-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .feedback-title {
@@ -623,6 +754,11 @@ button {
     align-items: start;
   }
 
+  .results-meta-stack,
+  .sort-controls {
+    justify-items: start;
+  }
+
   .view-toggle {
     flex-wrap: wrap;
   }
@@ -630,6 +766,10 @@ button {
   .app-footer-inner {
     grid-template-columns: 1fr 1fr;
     gap: 28px;
+  }
+
+  .insight-stats-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -670,6 +810,11 @@ button {
 
   .pagination {
     align-items: stretch;
+  }
+
+  .sort-controls select {
+    width: 100%;
+    min-width: 0;
   }
 
   .app-footer-inner {

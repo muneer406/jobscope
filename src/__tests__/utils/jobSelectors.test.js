@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
     getPaginatedJobs,
+    getRecommendedJobs,
+    getSavedJobInsights,
     getSelectedJob,
+    getSortedJobs,
     getTotalPages,
     getUniqueCompanies,
     getUniqueLocations,
@@ -10,6 +13,7 @@ import {
     JOBS_PER_PAGE,
     getVisibleJobs,
     isSavedJob,
+    SORT_OPTIONS,
     VIEW_MODES,
 } from '../../utils/jobSelectors';
 
@@ -313,5 +317,62 @@ describe('pagination helpers', () => {
             { ...jobs[0], id: 7 },
         ], 2, 3);
         expect(result.map((job) => job.id)).toEqual([4, 5, 6]);
+    });
+});
+
+describe('getSortedJobs', () => {
+    it('keeps the original order for the default sort', () => {
+        expect(getSortedJobs(jobs, SORT_OPTIONS.DEFAULT).map((job) => job.id)).toEqual([1, 2, 3]);
+    });
+
+    it('sorts jobs by title', () => {
+        expect(getSortedJobs(jobs, SORT_OPTIONS.TITLE_ASC).map((job) => job.title)).toEqual([
+            'Backend Developer',
+            'Frontend Engineer',
+            'Product Manager',
+        ]);
+    });
+
+    it('sorts jobs by company, then title', () => {
+        const sortedJobs = getSortedJobs([
+            { id: 10, title: 'Zeta Role', company: 'Acme', location: 'Remote', tags: [] },
+            { id: 11, title: 'Alpha Role', company: 'Acme', location: 'Berlin', tags: [] },
+            jobs[1],
+        ], SORT_OPTIONS.COMPANY_ASC);
+
+        expect(sortedJobs.map((job) => job.id)).toEqual([11, 10, 2]);
+    });
+});
+
+describe('getRecommendedJobs', () => {
+    it('returns unsaved jobs that best match saved-job patterns', () => {
+        const recommendationJobs = [
+            { id: 1, title: 'Frontend Engineer', company: 'Acme', location: 'Remote', tags: ['react', 'javascript'] },
+            { id: 2, title: 'Full Stack Engineer', company: 'Acme', location: 'Remote', tags: ['react', 'node'] },
+            { id: 3, title: 'Backend Developer', company: 'Beta', location: 'Berlin', tags: ['node'] },
+            { id: 4, title: 'UX Researcher', company: 'Gamma', location: 'Paris', tags: ['research'] },
+        ];
+
+        expect(getRecommendedJobs(recommendationJobs, [1]).map((job) => job.id)).toEqual([2]);
+    });
+
+    it('returns an empty list when there are no saved jobs', () => {
+        expect(getRecommendedJobs(jobs, [])).toEqual([]);
+    });
+});
+
+describe('getSavedJobInsights', () => {
+    it('summarizes saved jobs into counts and top facets', () => {
+        const insights = getSavedJobInsights([
+            jobs[0],
+            jobs[1],
+            { id: 4, title: 'React Lead', company: 'Acme', location: 'Remote', tags: ['react'] },
+        ], [1, 4]);
+
+        expect(insights.savedCount).toBe(2);
+        expect(insights.companyCount).toBe(1);
+        expect(insights.locationCount).toBe(1);
+        expect(insights.topTags[0]).toEqual({ label: 'react', count: 2 });
+        expect(insights.topCompanies[0]).toEqual({ label: 'Acme', count: 2 });
     });
 });

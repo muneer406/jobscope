@@ -3,10 +3,14 @@ import { createContext, useEffect, useState } from "react";
 import { fetchJobs } from "../api/jobs";
 import {
   getPaginatedJobs,
+  getRecommendedJobs,
+  getSavedJobInsights,
   getSelectedJob,
+  getSortedJobs,
   getTotalPages,
   getVisibleJobs,
   JOBS_PER_PAGE,
+  SORT_OPTIONS,
   VIEW_MODES,
 } from "../utils/jobSelectors";
 
@@ -17,13 +21,69 @@ const INITIAL_FILTERS = {
   tags: [],
 };
 
+const STORAGE_KEYS = {
+  filters: "jobscope.filters",
+  savedJobs: "jobscope.savedJobs",
+  sortOption: "jobscope.sortOption",
+  viewMode: "jobscope.viewMode",
+};
+
+function readStoredValue(storageKey, fallbackValue, validator) {
+  if (typeof window === "undefined") {
+    return fallbackValue;
+  }
+
+  try {
+    const storedValue = window.localStorage.getItem(storageKey);
+
+    if (storedValue === null) {
+      return fallbackValue;
+    }
+
+    const parsedValue = JSON.parse(storedValue);
+    return validator(parsedValue) ? parsedValue : fallbackValue;
+  } catch {
+    return fallbackValue;
+  }
+}
+
+function isValidFilterState(value) {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof value.searchQuery === "string" &&
+    Array.isArray(value.company) &&
+    Array.isArray(value.location) &&
+    Array.isArray(value.tags)
+  );
+}
+
+function isValidSavedJobs(value) {
+  return (
+    Array.isArray(value) && value.every((jobId) => Number.isInteger(jobId))
+  );
+}
+
 export const JobsContext = createContext(null);
 
 export function JobsProvider({ children }) {
   const [jobs, setJobs] = useState([]);
-  const [savedJobs, setSavedJobs] = useState([]);
-  const [filters, setFilters] = useState(INITIAL_FILTERS);
-  const [viewMode, setViewMode] = useState(VIEW_MODES.ALL);
+  const [savedJobs, setSavedJobs] = useState(() =>
+    readStoredValue(STORAGE_KEYS.savedJobs, [], isValidSavedJobs),
+  );
+  const [filters, setFilters] = useState(() =>
+    readStoredValue(STORAGE_KEYS.filters, INITIAL_FILTERS, isValidFilterState),
+  );
+  const [viewMode, setViewMode] = useState(() =>
+    readStoredValue(STORAGE_KEYS.viewMode, VIEW_MODES.ALL, (value) =>
+      Object.values(VIEW_MODES).includes(value),
+    ),
+  );
+  const [sortOption, setSortOption] = useState(() =>
+    readStoredValue(STORAGE_KEYS.sortOption, SORT_OPTIONS.DEFAULT, (value) =>
+      Object.values(SORT_OPTIONS).includes(value),
+    ),
+  );
   const [selectedJobId, setSelectedJobId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,9 +96,13 @@ export function JobsProvider({ children }) {
     viewMode,
   });
 
-  const totalPages = getTotalPages(visibleJobs.length, JOBS_PER_PAGE);
+  const sortedVisibleJobs = getSortedJobs(visibleJobs, sortOption);
+  const recommendedJobs = getRecommendedJobs(jobs, savedJobs);
+  const savedInsights = getSavedJobInsights(jobs, savedJobs);
+
+  const totalPages = getTotalPages(sortedVisibleJobs.length, JOBS_PER_PAGE);
   const paginatedJobs = getPaginatedJobs(
-    visibleJobs,
+    sortedVisibleJobs,
     currentPage,
     JOBS_PER_PAGE,
   );
@@ -96,7 +160,7 @@ export function JobsProvider({ children }) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, viewMode]);
+  }, [filters, sortOption, viewMode]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -192,6 +256,14 @@ export function JobsProvider({ children }) {
     setViewMode(VIEW_MODES.SAVED);
   }
 
+  function updateSortOption(nextSortOption) {
+    if (!Object.values(SORT_OPTIONS).includes(nextSortOption)) {
+      return;
+    }
+
+    setSortOption(nextSortOption);
+  }
+
   function goToPage(pageNumber) {
     const safePage = Math.min(Math.max(1, pageNumber), totalPages);
     setCurrentPage(safePage);
@@ -225,14 +297,58 @@ export function JobsProvider({ children }) {
     }
   }
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(
+      STORAGE_KEYS.savedJobs,
+      JSON.stringify(savedJobs),
+    );
+  }, [savedJobs]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(STORAGE_KEYS.filters, JSON.stringify(filters));
+  }, [filters]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(
+      STORAGE_KEYS.viewMode,
+      JSON.stringify(viewMode),
+    );
+  }, [viewMode]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(
+      STORAGE_KEYS.sortOption,
+      JSON.stringify(sortOption),
+    );
+  }, [sortOption]);
+
   return (
     <JobsContext.Provider
       value={{
         jobs,
         savedJobs,
         filters,
+        sortOption,
         viewMode,
         selectedJob,
+        recommendedJobs,
+        savedInsights,
         visibleJobs,
         paginatedJobs,
         currentPage,
@@ -251,6 +367,7 @@ export function JobsProvider({ children }) {
         clearSelectedJob,
         showAllJobs,
         showSavedJobs,
+        updateSortOption,
         goToPage,
         goToNextPage,
         goToPreviousPage,

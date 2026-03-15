@@ -3,10 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { useJobs } from "../hooks/useJobs";
 import { VIEW_MODES } from "../utils/jobSelectors";
 import { FiltersPanel } from "../components/FiltersPanel";
+import { InsightsPanel } from "../components/InsightsPanel";
 import { JobDetailsPanel } from "../components/JobDetailsPanel";
 import { JobList } from "../components/JobList";
 import { Pagination } from "../components/Pagination";
+import { RecommendationsPanel } from "../components/RecommendationsPanel";
 import { SearchBar } from "../components/SearchBar";
+import { SortControls } from "../components/SortControls";
 import { ViewToggle } from "../components/ViewToggle";
 import { useKeyboardNavigation } from "../hooks/useKeyboardNavigation";
 
@@ -24,11 +27,14 @@ export function Dashboard() {
     isLoading,
     jobs,
     paginatedJobs,
+    recommendedJobs,
     savedJobs,
+    savedInsights,
     selectJob,
     selectedJob,
     showAllJobs,
     showSavedJobs,
+    sortOption,
     toggleSavedJob,
     toggleTagFilter,
     toggleViewMode,
@@ -36,6 +42,7 @@ export function Dashboard() {
     updateCompanyFilter,
     updateLocationFilter,
     updateSearchQuery,
+    updateSortOption,
     viewMode,
     visibleJobs,
   } = useJobs();
@@ -109,6 +116,15 @@ export function Dashboard() {
             onToggleCompany={updateCompanyFilter}
             onToggleLocation={updateLocationFilter}
             onToggleTag={toggleTagFilter}
+          />
+
+          <InsightsPanel insights={savedInsights} />
+
+          <RecommendationsPanel
+            jobs={recommendedJobs}
+            onOpenJob={handleSelectJob}
+            onToggleSavedJob={toggleSavedJob}
+            savedJobs={savedJobs}
           />
 
           <div className="shortcuts-panel">
@@ -197,19 +213,26 @@ export function Dashboard() {
                     <strong>{visibleJobs.length}</strong>
                   </div>
 
-                  <div className="results-meta">
-                    <span>
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    {selectedJob ? (
-                      <button
-                        type="button"
-                        className="ghost-action"
-                        onClick={() => setActivePanel("details")}
-                      >
-                        Open selected job
-                      </button>
-                    ) : null}
+                  <div className="results-meta-stack">
+                    <SortControls
+                      sortOption={sortOption}
+                      onSortChange={updateSortOption}
+                    />
+
+                    <div className="results-meta">
+                      <span>
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      {selectedJob ? (
+                        <button
+                          type="button"
+                          className="ghost-action"
+                          onClick={() => setActivePanel("details")}
+                        >
+                          Open selected job
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
 
@@ -261,9 +284,7 @@ export function Dashboard() {
               <br />
               Save only what matters.
             </p>
-            <p className="footer-copyright">
-              &copy; 2026 Muneer Alam
-            </p>
+            <p className="footer-copyright">&copy; 2026 Muneer Alam</p>
           </div>
 
           <div className="footer-col">

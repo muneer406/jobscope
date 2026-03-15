@@ -2,13 +2,17 @@
 
 ![React](https://img.shields.io/badge/React-19-blue)
 ![Vite](https://img.shields.io/badge/Vite-7-purple)
-![Tests](https://img.shields.io/badge/tests-138%20passing-brightgreen)
-![Phase](https://img.shields.io/badge/phase-3%20complete-success)
+![Tests](https://img.shields.io/badge/tests-165%20passing-brightgreen)
+![Phase](https://img.shields.io/badge/phase-6%20complete-success)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 A **modern job discovery dashboard** built with React that focuses on **efficient job exploration, filtering, and organization**.
 
 Unlike traditional job boards centered around endless scrolling, **JobScope prioritizes structured discovery** through powerful filters, clean UI, and efficient navigation.
+
+Project repo: https://github.com/muneer406/jobscope
+
+Created by Muneer Alam.
 
 ---
 
@@ -24,7 +28,7 @@ Unlike traditional job boards centered around endless scrolling, **JobScope prio
 - Job detail inspection panel with clear-selection flow
 - Client-side pagination for filtered results
 - Loading and empty UI states
-- Footer with product and data-source context
+- Footer with product, project, and personal links
 
 ### Discovery & Filtering
 
@@ -37,17 +41,21 @@ Unlike traditional job boards centered around endless scrolling, **JobScope prio
 - Full keyboard navigation support
 - Command-style shortcuts
 - Rapid list navigation
+- Smooth auto-scroll to keyboard-selected jobs
+- Short j/k navigation delay for readable stepping
 
 ### Intelligence Layer
 
-- Job recommendations based on saved jobs
-- Sorting options
-- Saved job insights
+- Job recommendations based on saved-job patterns
+- Sorting by default order, title, company, or location
+- Saved-job insights for top tags, companies, and location coverage
 
 ### Persistence
 
 - Saved jobs stored locally
 - Filters restored on reload
+- View mode restored on reload
+- Sort preference restored on reload
 
 ---
 
@@ -91,18 +99,22 @@ src
 │
 ├── components
 │   ├── FiltersPanel.jsx  # company / location / tag filters
+│   ├── InsightsPanel.jsx
 │   ├── JobCard.jsx
 │   ├── JobDetailsPanel.jsx
 │   ├── JobList.jsx
 │   ├── Pagination.jsx
+│   ├── RecommendationsPanel.jsx
 │   ├── SearchBar.jsx
+│   ├── SortControls.jsx
 │   └── ViewToggle.jsx
 │
 ├── hooks
-│   └── useJobs.js
+│   ├── useJobs.js
+│   └── useKeyboardNavigation.js
 │
 ├── utils
-│   └── jobSelectors.js  # pure filter + derivation functions
+│   └── jobSelectors.js  # pure filter, sort, analytics, and derivation functions
 │
 ├── context
 │   └── JobsContext.jsx
@@ -211,18 +223,36 @@ This allows users to **filter broadly, browse results cleanly, and inspect a sin
 - Clear selection and return to results cleanly
 - Handles loading and empty-selection states cleanly
 
-### Added UX improvements
+### ✅ Added UX improvements
 
 - Results/details tab workflow to reduce visual clutter
 - Client-side pagination for filtered results
 - Responsive single-panel content area across desktop and mobile
 - Footer section for product framing and data-source disclosure
+- Collapsible filter chips for large option sets
 
-### Phase 4 — Keyboard navigation system
+### ✅ Phase 4 — Keyboard navigation system
 
-### Phase 5 — Intelligence layer
+- `/` focuses search
+- `j` and `k` move through the filtered list
+- `Enter` opens details for the current selection
+- `s` saves or unsaves the current selection
+- `v` toggles all-jobs and saved-jobs view
+- `Esc` exits focus or leaves the details panel
+- Off-screen selections scroll smoothly into view
 
-### Phase 6 — Persistence
+### ✅ Phase 5 — Intelligence layer
+
+- Sidebar recommendations derived from saved-job tag, company, and location overlap
+- Sort controls for default order, title, company, and location
+- Saved-job insights with counts and top facets
+
+### ✅ Phase 6 — Persistence
+
+- Saved jobs persist in localStorage
+- Filters persist in localStorage
+- View mode persists in localStorage
+- Sort preference persists in localStorage
 
 ---
 
@@ -255,7 +285,7 @@ npm test          # run once
 npm run test:watch # watch mode
 ```
 
-138 tests across 10 suites covering the API mapper, selectors, components, hooks, pagination, and filter actions.
+165 tests across 11 suites covering the API mapper, selectors, components, hooks, pagination, keyboard navigation, intelligence helpers, and persisted state.
 
 ---
 

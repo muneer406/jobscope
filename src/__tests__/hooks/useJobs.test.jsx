@@ -29,6 +29,14 @@ const mockJobs = [
     location: "Berlin",
     tags: ["node"],
   },
+  {
+    id: 3,
+    title: "Frontend Platform Engineer",
+    description: "Scale UI systems",
+    company: "Acme",
+    location: "Remote",
+    tags: ["react", "platform"],
+  },
 ];
 
 function ReadContext() {
@@ -62,6 +70,7 @@ function renderWithProvider() {
 describe("useJobs", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
   });
 
   it("throws when used outside a JobsProvider", () => {
@@ -86,7 +95,7 @@ describe("useJobs", () => {
     await waitFor(() => {
       expect(screen.getByTestId("loading").textContent).toBe("false");
     });
-    expect(screen.getByTestId("count").textContent).toBe("2");
+    expect(screen.getByTestId("count").textContent).toBe("3");
   });
 
   it("sets error message when fetchJobs rejects", async () => {
@@ -141,7 +150,7 @@ describe("useJobs", () => {
       screen.getByRole("button", { name: "search backend" }),
     );
     await userEvent.click(screen.getByRole("button", { name: "clear" }));
-    expect(screen.getByTestId("count").textContent).toBe("2");
+    expect(screen.getByTestId("count").textContent).toBe("3");
   });
 
   it("showSavedJobs switches viewMode to SAVED", async () => {
@@ -200,6 +209,51 @@ function FilterContext() {
   );
 }
 
+function IntelligenceContext() {
+  const ctx = useJobs();
+
+  return (
+    <div>
+      <span data-testid="sortOption">{ctx.sortOption}</span>
+      <span data-testid="recommendedIds">
+        {ctx.recommendedJobs.map((job) => job.id).join(",")}
+      </span>
+      <span data-testid="savedCount">{ctx.savedInsights.savedCount}</span>
+      <span data-testid="topCompany">
+        {ctx.savedInsights.topCompanies[0]?.label ?? ""}
+      </span>
+      <span data-testid="persistedSavedJobs">
+        {window.localStorage.getItem("jobscope.savedJobs") ?? ""}
+      </span>
+      <span data-testid="persistedFilters">
+        {window.localStorage.getItem("jobscope.filters") ?? ""}
+      </span>
+      <span data-testid="persistedSortOption">
+        {window.localStorage.getItem("jobscope.sortOption") ?? ""}
+      </span>
+      <span data-testid="persistedViewMode">
+        {window.localStorage.getItem("jobscope.viewMode") ?? ""}
+      </span>
+      <button onClick={() => ctx.toggleSavedJob(1)}>save first</button>
+      <button onClick={() => ctx.updateSearchQuery("Frontend")}>
+        set search
+      </button>
+      <button onClick={() => ctx.updateSortOption("company-asc")}>
+        sort company
+      </button>
+      <button onClick={() => ctx.showSavedJobs()}>persist saved view</button>
+    </div>
+  );
+}
+
+function renderIntelligenceProvider() {
+  return render(
+    <JobsProvider>
+      <IntelligenceContext />
+    </JobsProvider>,
+  );
+}
+
 function renderFilterProvider() {
   return render(
     <JobsProvider>
@@ -211,6 +265,7 @@ function renderFilterProvider() {
 describe("useJobs — Phase 2 filter actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
     fetchJobs.mockResolvedValue(mockJobs);
   });
 
@@ -326,5 +381,71 @@ describe("useJobs — Phase 2 filter actions", () => {
     await setup();
     await userEvent.click(screen.getByRole("button", { name: "page 2" }));
     expect(screen.getByTestId("currentPage").textContent).toBe("1");
+  });
+});
+
+describe("useJobs — Phase 5 and 6", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    window.localStorage.clear();
+    fetchJobs.mockResolvedValue(mockJobs);
+  });
+
+  it("restores persisted preferences from localStorage", async () => {
+    window.localStorage.setItem("jobscope.savedJobs", JSON.stringify([1]));
+    window.localStorage.setItem(
+      "jobscope.filters",
+      JSON.stringify({
+        searchQuery: "Front",
+        company: ["Acme"],
+        location: [],
+        tags: ["react"],
+      }),
+    );
+    window.localStorage.setItem("jobscope.viewMode", JSON.stringify("saved"));
+    window.localStorage.setItem(
+      "jobscope.sortOption",
+      JSON.stringify("company-asc"),
+    );
+
+    renderIntelligenceProvider();
+
+    await waitFor(() =>
+      expect(screen.getByTestId("sortOption").textContent).toBe("company-asc"),
+    );
+
+    expect(screen.getByTestId("savedCount").textContent).toBe("1");
+    expect(screen.getByTestId("topCompany").textContent).toBe("Acme");
+  });
+
+  it("derives recommendations from saved jobs", async () => {
+    renderIntelligenceProvider();
+
+    await userEvent.click(screen.getByRole("button", { name: "save first" }));
+
+    expect(screen.getByTestId("recommendedIds").textContent).toBe("3");
+  });
+
+  it("persists saved jobs, filters, sort option, and view mode", async () => {
+    renderIntelligenceProvider();
+
+    await userEvent.click(screen.getByRole("button", { name: "save first" }));
+    await userEvent.click(screen.getByRole("button", { name: "set search" }));
+    await userEvent.click(screen.getByRole("button", { name: "sort company" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "persist saved view" }),
+    );
+
+    expect(window.localStorage.getItem("jobscope.savedJobs")).toBe("[1]");
+    expect(window.localStorage.getItem("jobscope.filters")).toContain(
+      "Frontend",
+    );
+    expect(window.localStorage.getItem("jobscope.sortOption")).toBe(
+      '"company-asc"',
+    );
+
+    await waitFor(() =>
+      expect(window.localStorage.getItem("jobscope.viewMode")).toBe('"saved"'),
+    );
   });
 });
