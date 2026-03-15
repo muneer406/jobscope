@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useRef } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useKeyboardNavigation } from "../../hooks/useKeyboardNavigation";
 
@@ -13,7 +13,14 @@ const mockJobs = [
 function HookWrapper(props) {
   const searchInputRef = useRef(null);
   useKeyboardNavigation({ ...props, searchInputRef });
-  return <input data-testid="search" ref={searchInputRef} />;
+  return (
+    <>
+      <input data-testid="search" ref={searchInputRef} />
+      <div data-job-id="1">Job 1</div>
+      <div data-job-id="2">Job 2</div>
+      <div data-job-id="3">Job 3</div>
+    </>
+  );
 }
 
 function defaultProps(overrides = {}) {
@@ -32,6 +39,16 @@ function defaultProps(overrides = {}) {
 }
 
 describe("useKeyboardNavigation", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
   it("j selects the first job when nothing is selected", () => {
     const selectJob = vi.fn();
     render(<HookWrapper {...defaultProps({ selectJob })} />);
@@ -48,6 +65,25 @@ describe("useKeyboardNavigation", () => {
     );
     fireEvent.keyDown(document.body, { key: "j" });
     expect(selectJob).toHaveBeenCalledWith(2);
+  });
+
+  it("j navigation is rate-limited for a short moment", () => {
+    const selectJob = vi.fn();
+    render(
+      <HookWrapper
+        {...defaultProps({ selectedJob: mockJobs[0], selectJob })}
+      />,
+    );
+
+    fireEvent.keyDown(document.body, { key: "j" });
+    fireEvent.keyDown(document.body, { key: "j" });
+
+    expect(selectJob).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(141);
+    fireEvent.keyDown(document.body, { key: "j" });
+
+    expect(selectJob).toHaveBeenCalledTimes(2);
   });
 
   it("j does not go past the last job", () => {
@@ -150,5 +186,55 @@ describe("useKeyboardNavigation", () => {
     const input = screen.getByTestId("search");
     fireEvent.keyDown(input, { key: "v" });
     expect(toggleViewMode).not.toHaveBeenCalled();
+  });
+
+  it("smoothly scrolls the selected job into view when it is off-screen", () => {
+    const scrollIntoView = vi.fn();
+
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 800,
+    });
+
+    render(<HookWrapper {...defaultProps({ selectedJob: mockJobs[1] })} />);
+
+    const selectedElement = document.querySelector('[data-job-id="2"]');
+
+    Object.defineProperty(selectedElement, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({ top: 900, bottom: 980 }),
+    });
+    selectedElement.scrollIntoView = scrollIntoView;
+
+    render(<HookWrapper {...defaultProps({ selectedJob: mockJobs[1] })} />);
+
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+  });
+
+  it("does not scroll when the selected job is already visible", () => {
+    const scrollIntoView = vi.fn();
+
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 800,
+    });
+
+    render(<HookWrapper {...defaultProps({ selectedJob: mockJobs[1] })} />);
+
+    const selectedElement = document.querySelector('[data-job-id="2"]');
+
+    Object.defineProperty(selectedElement, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({ top: 120, bottom: 240 }),
+    });
+    selectedElement.scrollIntoView = scrollIntoView;
+
+    render(<HookWrapper {...defaultProps({ selectedJob: mockJobs[1] })} />);
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });

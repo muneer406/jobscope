@@ -51,6 +51,7 @@ export function JobList({
       {jobs.map((job) => (
         <div
           key={job.id}
+          data-job-id={job.id}
           className="job-list-item"
           role="button"
           tabIndex={0}

@@ -1,6 +1,14 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { JOBS_PER_PAGE } from "../utils/jobSelectors";
+
+const NAVIGATION_COOLDOWN_MS = 140;
+
+function isElementInViewport(element) {
+  const rect = element.getBoundingClientRect();
+
+  return rect.top >= 0 && rect.bottom <= window.innerHeight;
+}
 
 export function useKeyboardNavigation({
   activePanel,
@@ -14,6 +22,22 @@ export function useKeyboardNavigation({
   toggleViewMode,
   visibleJobs,
 }) {
+  const navigationLockedRef = useRef(false);
+  const navigationTimerRef = useRef(null);
+
+  const beginNavigationCooldown = useCallback(() => {
+    navigationLockedRef.current = true;
+
+    if (navigationTimerRef.current) {
+      window.clearTimeout(navigationTimerRef.current);
+    }
+
+    navigationTimerRef.current = window.setTimeout(() => {
+      navigationLockedRef.current = false;
+      navigationTimerRef.current = null;
+    }, NAVIGATION_COOLDOWN_MS);
+  }, []);
+
   const handleKeyDown = useCallback(
     (event) => {
       const target = event.target;
@@ -48,6 +72,11 @@ export function useKeyboardNavigation({
 
       if (event.key === "j") {
         event.preventDefault();
+
+        if (navigationLockedRef.current) {
+          return;
+        }
+
         const currentIdx = visibleJobs.findIndex(
           (job) => job.id === selectedJob?.id,
         );
@@ -56,6 +85,7 @@ export function useKeyboardNavigation({
           if (visibleJobs.length > 0) {
             selectJob(visibleJobs[0].id);
             goToPage(1);
+            beginNavigationCooldown();
           }
         } else if (currentIdx < visibleJobs.length - 1) {
           const newIdx = currentIdx + 1;
@@ -64,12 +94,18 @@ export function useKeyboardNavigation({
           if (newPage !== currentPage) {
             goToPage(newPage);
           }
+          beginNavigationCooldown();
         }
         return;
       }
 
       if (event.key === "k") {
         event.preventDefault();
+
+        if (navigationLockedRef.current) {
+          return;
+        }
+
         const currentIdx = visibleJobs.findIndex(
           (job) => job.id === selectedJob?.id,
         );
@@ -81,6 +117,7 @@ export function useKeyboardNavigation({
           if (newPage !== currentPage) {
             goToPage(newPage);
           }
+          beginNavigationCooldown();
         }
         return;
       }
@@ -114,8 +151,29 @@ export function useKeyboardNavigation({
       toggleSavedJob,
       toggleViewMode,
       visibleJobs,
+      beginNavigationCooldown,
     ],
   );
+
+  useEffect(() => {
+    if (!selectedJob || activePanel !== "results") {
+      return;
+    }
+
+    const selectedElement = document.querySelector(
+      `[data-job-id="${selectedJob.id}"]`,
+    );
+
+    if (!selectedElement || isElementInViewport(selectedElement)) {
+      return;
+    }
+
+    selectedElement.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+  }, [activePanel, currentPage, selectedJob]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
@@ -123,4 +181,12 @@ export function useKeyboardNavigation({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleKeyDown]);
+
+  useEffect(() => {
+    return () => {
+      if (navigationTimerRef.current) {
+        window.clearTimeout(navigationTimerRef.current);
+      }
+    };
+  }, []);
 }
