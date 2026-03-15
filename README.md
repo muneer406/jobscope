@@ -1,8 +1,9 @@
 # JobScope - Smart Job Discovery Dashboard
 
-![React](https://img.shields.io/badge/React-18-blue)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow)
-![Status](https://img.shields.io/badge/status-in%20development-orange)
+![React](https://img.shields.io/badge/React-19-blue)
+![Vite](https://img.shields.io/badge/Vite-7-purple)
+![Tests](https://img.shields.io/badge/tests-113%20passing-brightgreen)
+![Phase](https://img.shields.io/badge/phase-2%20complete-success)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 A **modern job discovery dashboard** built with React that focuses on **efficient job exploration, filtering, and organization**.
@@ -85,19 +86,21 @@ The project follows a modular architecture separating **UI, state logic, and API
 src
 │
 ├── api
-│   └── jobsApi.js
+│   ├── jobs.js          # fetch layer
+│   └── jobMapper.js     # API → internal shape
 │
 ├── components
+│   ├── FiltersPanel.jsx  # company / location / tag filters
 │   ├── JobCard.jsx
 │   ├── JobList.jsx
-│   ├── FiltersPanel.jsx
-│   └── SavedJobsPanel.jsx
+│   ├── SearchBar.jsx
+│   └── ViewToggle.jsx
 │
 ├── hooks
 │   └── useJobs.js
 │
 ├── utils
-│   └── jobMapper.js
+│   └── jobSelectors.js  # pure filter + derivation functions
 │
 ├── context
 │   └── JobsContext.jsx
@@ -147,15 +150,15 @@ This approach prevents inconsistent UI states and simplifies debugging.
 
 ## Keyboard Shortcuts
 
-| Key | Action |
-|----|----|
-| `/` | Focus search |
-| `j` | Move selection down |
-| `k` | Move selection up |
-| `enter` | Open job details |
-| `s` | Save job |
-| `v` | Toggle saved/all view |
-| `esc` | Exit focus |
+| Key     | Action                |
+| ------- | --------------------- |
+| `/`     | Focus search          |
+| `j`     | Move selection down   |
+| `k`     | Move selection up     |
+| `enter` | Open job details      |
+| `s`     | Save job              |
+| `v`     | Toggle saved/all view |
+| `esc`   | Exit focus            |
 
 Keyboard navigation improves efficiency but **all features remain accessible via mouse**.
 
@@ -184,29 +187,33 @@ This allows users to **quickly scan and inspect jobs without losing context**.
 
 ## Feature Roadmap
 
-### Phase 1
-Core job discovery system.
+### ✅ Phase 1 — Core job discovery
 
-### Phase 2
-Advanced filtering.
+- Fetch and map jobs from JSONPlaceholder API
+- Search by title, save jobs, toggle saved / all view
+- Neo-Brutalist dashboard layout
 
-### Phase 3
-Job detail panel.
+### ✅ Phase 2 — Advanced filtering
 
-### Phase 4
-Keyboard navigation system.
+- Filter by company, location, and tags (OR logic)
+- `FiltersPanel` with single-select company / location chips and multi-select tag chips
+- Toggle behaviour: clicking an active filter clears it
+- "Clear all" button when any filter is active
+- `hasActiveFilters` derived state
 
-### Phase 5
-Intelligence layer.
+### Phase 3 — Job detail panel
 
-### Phase 6
-Persistence.
+### Phase 4 — Keyboard navigation system
+
+### Phase 5 — Intelligence layer
+
+### Phase 6 — Persistence
 
 ---
 
 ## Installation
 
-``` bash
+```bash
 git clone https://github.com/muneer406/jobscope.git
 
 cd jobscope
@@ -222,10 +229,18 @@ npm run dev
 
 The project is implemented in structured phases to ensure:
 
-* stable architecture
-* predictable feature growth
-* maintainable codebase
+- stable architecture
+- predictable feature growth
+- maintainable codebase
 
+### Run tests
+
+```bash
+npm test          # run once
+npm run test:watch # watch mode
+```
+
+113 tests across 8 suites covering the API mapper, selectors, all components, hooks, and filter actions.
 
 ---
 
@@ -235,11 +250,13 @@ Since most public APIs do not provide free job data, the project maps generic AP
 
 Example mapping:
 
-| API Field  | Job Field       |
-| ---------- | --------------- |
-| post.title | job.title       |
-| post.body  | job.description |
-| user.name  | company         |
+| API Field           | Job Field         |
+| ------------------- | ----------------- |
+| `post.title`        | `job.title`       |
+| `post.body`         | `job.description` |
+| `user.company.name` | `job.company`     |
+| `user.address.city` | `job.location`    |
+| derived from title  | `job.tags`        |
 
 This allows development without relying on proprietary job APIs.
 
@@ -249,11 +266,11 @@ This allows development without relying on proprietary job APIs.
 
 Potential upgrades:
 
-* AI skill match scoring
-* resume keyword matching
-* advanced job recommendations
-* real job API integration
-* authentication
+- AI skill match scoring
+- resume keyword matching
+- advanced job recommendations
+- real job API integration
+- authentication
 
 ---
 

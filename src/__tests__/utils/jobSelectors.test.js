@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest';
 
-import { getSelectedJob, getVisibleJobs, isSavedJob, VIEW_MODES } from '../../utils/jobSelectors';
+import {
+    getSelectedJob,
+    getUniqueCompanies,
+    getUniqueLocations,
+    getUniqueTags,
+    getVisibleJobs,
+    isSavedJob,
+    VIEW_MODES,
+} from '../../utils/jobSelectors';
 
 const jobs = [
-    { id: 1, title: 'Frontend Engineer', company: 'Acme' },
-    { id: 2, title: 'Backend Developer', company: 'Beta' },
-    { id: 3, title: 'Product Manager', company: 'Gamma' },
+    { id: 1, title: 'Frontend Engineer', company: 'Acme', location: 'Remote', tags: ['react', 'javascript'] },
+    { id: 2, title: 'Backend Developer', company: 'Beta', location: 'Berlin', tags: ['node', 'javascript'] },
+    { id: 3, title: 'Product Manager', company: 'Gamma', location: 'Remote', tags: ['product'] },
 ];
 
 describe('isSavedJob', () => {
@@ -113,5 +121,149 @@ describe('getVisibleJobs', () => {
             expect(VIEW_MODES.SAVED).toBeDefined();
             expect(VIEW_MODES.ALL).not.toBe(VIEW_MODES.SAVED);
         });
+    });
+
+    describe('company filter', () => {
+        it('returns only jobs matching the company (case insensitive)', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { company: 'acme' },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result.map((j) => j.id)).toEqual([1]);
+        });
+
+        it('returns all jobs when company filter is empty', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { company: '' },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result).toHaveLength(3);
+        });
+    });
+
+    describe('location filter', () => {
+        it('returns only jobs for the given location', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { location: 'berlin' },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result.map((j) => j.id)).toEqual([2]);
+        });
+
+        it('matches multiple jobs with the same location', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { location: 'remote' },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result.map((j) => j.id)).toEqual([1, 3]);
+        });
+    });
+
+    describe('tag filter (OR logic)', () => {
+        it('returns jobs that contain any of the selected tags', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { tags: ['react'] },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result.map((j) => j.id)).toEqual([1]);
+        });
+
+        it('returns jobs matching at least one of multiple selected tags', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { tags: ['react', 'node'] },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result.map((j) => j.id)).toEqual([1, 2]);
+        });
+
+        it('returns all jobs when tags filter is empty', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { tags: [] },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result).toHaveLength(3);
+        });
+    });
+
+    describe('combined filters', () => {
+        it('applies company + location together', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { company: 'acme', location: 'remote' },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result.map((j) => j.id)).toEqual([1]);
+        });
+
+        it('returns nothing when filters conflict', () => {
+            const result = getVisibleJobs({
+                jobs,
+                savedJobs: [],
+                filters: { company: 'acme', location: 'berlin' },
+                viewMode: VIEW_MODES.ALL,
+            });
+            expect(result).toHaveLength(0);
+        });
+    });
+});
+
+describe('getUniqueCompanies', () => {
+    it('returns a sorted list of unique company names', () => {
+        expect(getUniqueCompanies(jobs)).toEqual(['Acme', 'Beta', 'Gamma']);
+    });
+
+    it('returns an empty array for empty input', () => {
+        expect(getUniqueCompanies([])).toEqual([]);
+    });
+
+    it('deduplicates companies', () => {
+        const dupeJobs = [...jobs, { ...jobs[0], id: 99 }];
+        const result = getUniqueCompanies(dupeJobs);
+        expect(result.filter((c) => c === 'Acme')).toHaveLength(1);
+    });
+});
+
+describe('getUniqueLocations', () => {
+    it('returns a sorted list of unique locations', () => {
+        expect(getUniqueLocations(jobs)).toEqual(['Berlin', 'Remote']);
+    });
+
+    it('deduplicates locations', () => {
+        const result = getUniqueLocations(jobs);
+        expect(result.filter((l) => l === 'Remote')).toHaveLength(1);
+    });
+
+    it('returns an empty array for empty input', () => {
+        expect(getUniqueLocations([])).toEqual([]);
+    });
+});
+
+describe('getUniqueTags', () => {
+    it('returns a sorted, flat, unique list of all tags', () => {
+        expect(getUniqueTags(jobs)).toEqual(['javascript', 'node', 'product', 'react']);
+    });
+
+    it('deduplicates tags across jobs', () => {
+        const result = getUniqueTags(jobs);
+        expect(result.filter((t) => t === 'javascript')).toHaveLength(1);
+    });
+
+    it('returns an empty array for empty input', () => {
+        expect(getUniqueTags([])).toEqual([]);
     });
 });

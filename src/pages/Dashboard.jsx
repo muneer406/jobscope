@@ -1,19 +1,26 @@
 import { useJobs } from "../hooks/useJobs";
 import { VIEW_MODES } from "../utils/jobSelectors";
+import { FiltersPanel } from "../components/FiltersPanel";
 import { JobList } from "../components/JobList";
 import { SearchBar } from "../components/SearchBar";
 import { ViewToggle } from "../components/ViewToggle";
 
 export function Dashboard() {
   const {
+    clearAllFilters,
     error,
     filters,
+    hasActiveFilters,
     isLoading,
+    jobs,
     savedJobs,
     selectedJob,
     showAllJobs,
     showSavedJobs,
     toggleSavedJob,
+    toggleTagFilter,
+    updateCompanyFilter,
+    updateLocationFilter,
     updateSearchQuery,
     viewMode,
     visibleJobs,
@@ -22,7 +29,7 @@ export function Dashboard() {
   return (
     <main className="app-shell">
       <section className="hero-panel">
-        <p className="eyebrow">Phase 1</p>
+        <p className="eyebrow">Phase 2</p>
         <h1>JobScope</h1>
         <p className="hero-copy">
           A direct, searchable dashboard for exploring mapped job listings.
@@ -46,6 +53,16 @@ export function Dashboard() {
             </strong>
           </article>
         </div>
+
+        <FiltersPanel
+          jobs={jobs}
+          filters={filters}
+          hasActiveFilters={hasActiveFilters}
+          onClearAll={clearAllFilters}
+          onToggleCompany={updateCompanyFilter}
+          onToggleLocation={updateLocationFilter}
+          onToggleTag={toggleTagFilter}
+        />
       </section>
 
       <section className="dashboard-panel">

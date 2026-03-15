@@ -9,6 +9,9 @@ import {
 
 const INITIAL_FILTERS = {
   searchQuery: "",
+  company: "",
+  location: "",
+  tags: [],
 };
 
 export const JobsContext = createContext(null);
@@ -101,6 +104,42 @@ export function JobsProvider({ children }) {
     }));
   }
 
+  function updateCompanyFilter(company) {
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      company: currentFilters.company === company ? "" : company,
+    }));
+  }
+
+  function updateLocationFilter(location) {
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      location: currentFilters.location === location ? "" : location,
+    }));
+  }
+
+  function toggleTagFilter(tag) {
+    setFilters((currentFilters) => {
+      const hasTags = currentFilters.tags.includes(tag);
+      return {
+        ...currentFilters,
+        tags: hasTags
+          ? currentFilters.tags.filter((t) => t !== tag)
+          : [...currentFilters.tags, tag],
+      };
+    });
+  }
+
+  function clearAllFilters() {
+    setFilters(INITIAL_FILTERS);
+  }
+
+  const hasActiveFilters =
+    filters.searchQuery !== "" ||
+    filters.company !== "" ||
+    filters.location !== "" ||
+    filters.tags.length > 0;
+
   function toggleSavedJob(jobId) {
     setSavedJobs((currentSavedJobs) => {
       if (currentSavedJobs.includes(jobId)) {
@@ -160,6 +199,11 @@ export function JobsProvider({ children }) {
         error,
         updateSearchQuery,
         clearSearchQuery,
+        updateCompanyFilter,
+        updateLocationFilter,
+        toggleTagFilter,
+        clearAllFilters,
+        hasActiveFilters,
         toggleSavedJob,
         selectJob,
         showAllJobs,

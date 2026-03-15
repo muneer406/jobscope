@@ -357,3 +357,59 @@ button {
     flex-direction: column;
   }
 }
+
+/* ─── Phase 2: Filters ─────────────────────────────────────── */
+
+.filters-panel {
+  margin-top: 24px;
+  display: grid;
+  gap: 18px;
+}
+
+.filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filter-group-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.filter-chip {
+  padding: 6px 12px;
+  border: 2px solid #161616;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.filter-chip.active {
+  background: #161616;
+  color: #fff;
+}
+
+.filter-chip:hover:not(.active) {
+  transform: translate(-2px, -2px);
+}
+
+.clear-filters-button {
+  padding: 6px 12px;
+  border: 2px solid #161616;
+  background: #fd8f52;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
