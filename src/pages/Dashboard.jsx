@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useJobs } from "../hooks/useJobs";
 import { VIEW_MODES } from "../utils/jobSelectors";
@@ -8,6 +8,7 @@ import { JobList } from "../components/JobList";
 import { Pagination } from "../components/Pagination";
 import { SearchBar } from "../components/SearchBar";
 import { ViewToggle } from "../components/ViewToggle";
+import { useKeyboardNavigation } from "../hooks/useKeyboardNavigation";
 
 export function Dashboard() {
   const {
@@ -30,6 +31,7 @@ export function Dashboard() {
     showSavedJobs,
     toggleSavedJob,
     toggleTagFilter,
+    toggleViewMode,
     totalPages,
     updateCompanyFilter,
     updateLocationFilter,
@@ -39,6 +41,20 @@ export function Dashboard() {
   } = useJobs();
 
   const [activePanel, setActivePanel] = useState("results");
+  const searchInputRef = useRef(null);
+
+  useKeyboardNavigation({
+    activePanel,
+    currentPage,
+    goToPage,
+    searchInputRef,
+    selectedJob,
+    selectJob,
+    setActivePanel,
+    toggleSavedJob,
+    toggleViewMode,
+    visibleJobs,
+  });
 
   useEffect(() => {
     if (!selectedJob && activePanel === "details") {
@@ -60,7 +76,7 @@ export function Dashboard() {
     <>
       <main className="app-shell">
         <section className="hero-panel">
-          <p className="eyebrow">Phase 3</p>
+          <p className="eyebrow">Phase 4</p>
           <h1>JobScope</h1>
           <p className="hero-copy">
             A direct, searchable dashboard for exploring mapped job listings.
@@ -94,11 +110,36 @@ export function Dashboard() {
             onToggleLocation={updateLocationFilter}
             onToggleTag={toggleTagFilter}
           />
+
+          <div className="shortcuts-panel">
+            <p className="filter-group-label">Keyboard Shortcuts</p>
+            <ul className="shortcuts-list">
+              <li>
+                <kbd>/</kbd> Focus search
+              </li>
+              <li>
+                <kbd>j</kbd> / <kbd>k</kbd> Navigate jobs
+              </li>
+              <li>
+                <kbd>Enter</kbd> Open details
+              </li>
+              <li>
+                <kbd>s</kbd> Save / unsave
+              </li>
+              <li>
+                <kbd>v</kbd> Toggle view
+              </li>
+              <li>
+                <kbd>Esc</kbd> Exit focus
+              </li>
+            </ul>
+          </div>
         </section>
 
         <section className="dashboard-panel">
           <div className="controls-row">
             <SearchBar
+              ref={searchInputRef}
               searchQuery={filters.searchQuery}
               onSearchChange={updateSearchQuery}
             />
@@ -220,6 +261,9 @@ export function Dashboard() {
               <br />
               Save only what matters.
             </p>
+            <p className="footer-copyright">
+              &copy; 2026 Muneer Alam
+            </p>
           </div>
 
           <div className="footer-col">
@@ -240,10 +284,50 @@ export function Dashboard() {
             </ul>
           </div>
 
-          <div className="footer-col footer-col-end">
-            <p className="footer-col-label">Project</p>
-            <p className="footer-copyright">Phase 3 &middot; Demo project</p>
-            <p className="footer-copyright">&copy; 2026 JobScope</p>
+          <div className="footer-col">
+            <p className="footer-col-label">Connect</p>
+            <ul className="footer-list">
+              <li>
+                <a
+                  href="https://github.com/muneer320"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="footer-link"
+                >
+                  GitHub @muneer320
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://linkedin.com/in/muneer320"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="footer-link"
+                >
+                  LinkedIn @muneer320
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://muneer320.tech"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="footer-link"
+                >
+                  muneer320.tech
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/muneer406/jobscope"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="footer-link"
+                >
+                  Project Repo
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </footer>

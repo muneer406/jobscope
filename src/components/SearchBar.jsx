@@ -1,8 +1,14 @@
-export function SearchBar({ searchQuery, onSearchChange }) {
+import { forwardRef } from "react";
+
+export const SearchBar = forwardRef(function SearchBar(
+  { searchQuery, onSearchChange },
+  ref,
+) {
   return (
     <label className="search-field" htmlFor="job-search">
       <span>Search by title</span>
       <input
+        ref={ref}
         id="job-search"
         type="search"
         value={searchQuery}
@@ -11,4 +17,4 @@ export function SearchBar({ searchQuery, onSearchChange }) {
       />
     </label>
   );
-}
+});
