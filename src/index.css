@@ -515,27 +515,91 @@ button {
   cursor: not-allowed;
 }
 
+.pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 6px;
+  font-weight: 700;
+  color: #888;
+  user-select: none;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Footer ──────────────────────────────────────────────── */
+
 .app-footer {
-  padding: 16px 28px 28px;
+  background: #161616;
+  border-top: 4px solid #000;
+  padding: 0 28px 28px;
 }
 
 .app-footer-inner {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 18px 22px;
-  border: 3px solid #161616;
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 8px 8px 0 #161616;
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
+  padding: 40px 28px 32px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
 }
 
-.app-footer-inner p {
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-logo {
+  font-size: 1.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #f5c842;
   margin: 0;
-  max-width: 34rem;
+  line-height: 1;
+}
+
+.footer-tagline {
   font-size: 0.95rem;
+  color: #a0a0a0;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-col-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #f5c842;
+  margin: 0 0 14px;
+}
+
+.footer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.footer-list li {
+  font-size: 0.875rem;
+  color: #b0b0b0;
+}
+
+.footer-col-end {
+  justify-content: flex-end;
+}
+
+.footer-copyright {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 2px 0;
 }
 
 @media (max-width: 960px) {
@@ -547,14 +611,18 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .results-toolbar,
-  .app-footer-inner {
+  .results-toolbar {
     flex-direction: column;
     align-items: start;
   }
 
   .view-toggle {
     flex-wrap: wrap;
+  }
+
+  .app-footer-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
   }
 }
 
@@ -568,7 +636,6 @@ button {
   .feedback-panel,
   .job-card,
   .content-surface,
-  .app-footer-inner,
   .panel-tab {
     box-shadow: 5px 5px 0 #161616;
   }
@@ -596,6 +663,16 @@ button {
 
   .pagination {
     align-items: stretch;
+  }
+
+  .app-footer-inner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 28px 20px 24px;
+  }
+
+  .footer-col-end {
+    justify-content: flex-start;
   }
 }
 
@@ -643,6 +720,18 @@ button {
 }
 
 .filter-chip:hover:not(.active) {
+  transform: translate(-2px, -2px);
+}
+
+.filter-chip-toggle {
+  background: transparent;
+  border-style: dashed;
+  color: #505050;
+  font-size: 0.78rem;
+}
+
+.filter-chip-toggle:hover {
+  background: #f5f5f5;
   transform: translate(-2px, -2px);
 }
 

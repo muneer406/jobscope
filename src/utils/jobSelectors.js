@@ -3,7 +3,7 @@ export const VIEW_MODES = {
     SAVED: 'saved',
 };
 
-export const JOBS_PER_PAGE = 6;
+export const JOBS_PER_PAGE = 10;
 
 function normalizeQuery(value) {
     return String(value ?? '').trim().toLowerCase();

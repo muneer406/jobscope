@@ -46,10 +46,22 @@ describe("Pagination", () => {
     expect(onNextPage).toHaveBeenCalledTimes(1);
   });
 
+  it("always shows first and last page number buttons", () => {
+    renderPagination({ currentPage: 5, totalPages: 10 });
+    expect(screen.getByRole("button", { name: "1" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "10" })).toBeInTheDocument();
+  });
+
+  it("renders ellipsis when pages are non-consecutive", () => {
+    renderPagination({ currentPage: 5, totalPages: 10 });
+    const ellipses = screen.getAllByText("\u2026");
+    expect(ellipses.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("calls onPageChange with the selected page number", async () => {
     const onPageChange = vi.fn();
     renderPagination({ onPageChange });
-    await userEvent.click(screen.getByRole("button", { name: "4" }));
-    expect(onPageChange).toHaveBeenCalledWith(4);
+    await userEvent.click(screen.getByRole("button", { name: "3" }));
+    expect(onPageChange).toHaveBeenCalledWith(3);
   });
 });

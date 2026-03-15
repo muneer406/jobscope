@@ -1,13 +1,21 @@
-function getVisiblePages(currentPage, totalPages) {
-  const start = Math.max(1, currentPage - 2);
-  const end = Math.min(totalPages, currentPage + 2);
-  const pages = [];
+function getPageItems(currentPage, totalPages) {
+  const corePages = new Set(
+    [1, totalPages, currentPage - 1, currentPage, currentPage + 1].filter(
+      (p) => p >= 1 && p <= totalPages,
+    ),
+  );
 
-  for (let page = start; page <= end; page += 1) {
-    pages.push(page);
+  const sorted = [...corePages].sort((a, b) => a - b);
+  const items = [];
+
+  for (let i = 0; i < sorted.length; i += 1) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) {
+      items.push("...");
+    }
+    items.push(sorted[i]);
   }
 
-  return pages;
+  return items;
 }
 
 export function Pagination({
@@ -21,7 +29,7 @@ export function Pagination({
     return null;
   }
 
-  const pages = getVisiblePages(currentPage, totalPages);
+  const items = getPageItems(currentPage, totalPages);
 
   return (
     <nav className="pagination" aria-label="Pagination">
@@ -35,21 +43,27 @@ export function Pagination({
       </button>
 
       <div className="pagination-pages">
-        {pages.map((page) => (
-          <button
-            key={page}
-            type="button"
-            className={
-              page === currentPage
-                ? "pagination-button active"
-                : "pagination-button"
-            }
-            onClick={() => onPageChange(page)}
-            aria-current={page === currentPage ? "page" : undefined}
-          >
-            {page}
-          </button>
-        ))}
+        {items.map((item, idx) =>
+          item === "..." ? (
+            <span key={`ellipsis-${idx}`} className="pagination-ellipsis">
+              &hellip;
+            </span>
+          ) : (
+            <button
+              key={item}
+              type="button"
+              className={
+                item === currentPage
+                  ? "pagination-button active"
+                  : "pagination-button"
+              }
+              onClick={() => onPageChange(item)}
+              aria-current={item === currentPage ? "page" : undefined}
+            >
+              {item}
+            </button>
+          ),
+        )}
       </div>
 
       <button

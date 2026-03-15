@@ -293,7 +293,7 @@ describe('getUniqueTags', () => {
 
 describe('pagination helpers', () => {
     it('exposes a jobs per page constant', () => {
-        expect(JOBS_PER_PAGE).toBe(6);
+        expect(JOBS_PER_PAGE).toBe(10);
     });
 
     it('computes total pages for a filtered result set', () => {

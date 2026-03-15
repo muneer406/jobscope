@@ -213,14 +213,38 @@ export function Dashboard() {
 
       <footer className="app-footer">
         <div className="app-footer-inner">
-          <p>
-            JobScope keeps browsing focused: filter broadly, inspect one job
-            clearly, and save only what matters.
-          </p>
-          <p>
-            Mapped demo data comes from JSONPlaceholder and is reshaped into a
-            job-first format for the dashboard.
-          </p>
+          <div className="footer-brand">
+            <p className="footer-logo">JobScope</p>
+            <p className="footer-tagline">
+              Filter broadly. Inspect clearly.
+              <br />
+              Save only what matters.
+            </p>
+          </div>
+
+          <div className="footer-col">
+            <p className="footer-col-label">Built With</p>
+            <ul className="footer-list">
+              <li>React 19 + Vite 7</li>
+              <li>Vitest + Testing Library</li>
+              <li>Neo-Brutalist CSS</li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <p className="footer-col-label">Data Source</p>
+            <ul className="footer-list">
+              <li>JSONPlaceholder API</li>
+              <li>100 posts mapped to jobs</li>
+              <li>10 users as companies</li>
+            </ul>
+          </div>
+
+          <div className="footer-col footer-col-end">
+            <p className="footer-col-label">Project</p>
+            <p className="footer-copyright">Phase 3 &middot; Demo project</p>
+            <p className="footer-copyright">&copy; 2026 JobScope</p>
+          </div>
         </div>
       </footer>
     </>

@@ -1,17 +1,27 @@
+import { useState } from "react";
 import {
   getUniqueCompanies,
   getUniqueLocations,
   getUniqueTags,
 } from "../utils/jobSelectors";
 
+const COLLAPSE_THRESHOLD = 8;
+
 function FilterGroup({ label, items, activeItems, onToggle }) {
+  const [expanded, setExpanded] = useState(false);
+
   if (items.length === 0) return null;
+
+  const hasMore = items.length > COLLAPSE_THRESHOLD;
+  const visibleItems =
+    hasMore && !expanded ? items.slice(0, COLLAPSE_THRESHOLD) : items;
+  const hiddenCount = items.length - COLLAPSE_THRESHOLD;
 
   return (
     <div className="filter-group">
       <p className="filter-group-label">{label}</p>
       <div className="filter-options">
-        {items.map((item) => (
+        {visibleItems.map((item) => (
           <button
             key={item}
             type="button"
@@ -23,19 +33,35 @@ function FilterGroup({ label, items, activeItems, onToggle }) {
             {item}
           </button>
         ))}
+        {hasMore && (
+          <button
+            type="button"
+            className="filter-chip filter-chip-toggle"
+            onClick={() => setExpanded((prev) => !prev)}
+          >
+            {expanded ? "Show less" : `+${hiddenCount} more`}
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
 function TagFilterGroup({ tags, activeTags, onToggle }) {
+  const [expanded, setExpanded] = useState(false);
+
   if (tags.length === 0) return null;
+
+  const hasMore = tags.length > COLLAPSE_THRESHOLD;
+  const visibleTags =
+    hasMore && !expanded ? tags.slice(0, COLLAPSE_THRESHOLD) : tags;
+  const hiddenCount = tags.length - COLLAPSE_THRESHOLD;
 
   return (
     <div className="filter-group">
       <p className="filter-group-label">Tags</p>
       <div className="filter-options">
-        {tags.map((tag) => (
+        {visibleTags.map((tag) => (
           <button
             key={tag}
             type="button"
@@ -47,6 +73,15 @@ function TagFilterGroup({ tags, activeTags, onToggle }) {
             {tag}
           </button>
         ))}
+        {hasMore && (
+          <button
+            type="button"
+            className="filter-chip filter-chip-toggle"
+            onClick={() => setExpanded((prev) => !prev)}
+          >
+            {expanded ? "Show less" : `+${hiddenCount} more`}
+          </button>
+        )}
       </div>
     </div>
   );
