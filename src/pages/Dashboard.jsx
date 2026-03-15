@@ -83,7 +83,7 @@ export function Dashboard() {
     <>
       <main className="app-shell">
         <section className="hero-panel">
-          <p className="eyebrow">Phase 4</p>
+          <p className="eyebrow">Smart Job Discovery</p>
           <h1>JobScope</h1>
           <p className="hero-copy">
             A direct, searchable dashboard for exploring mapped job listings.
@@ -117,8 +117,6 @@ export function Dashboard() {
             onToggleLocation={updateLocationFilter}
             onToggleTag={toggleTagFilter}
           />
-
-          <InsightsPanel insights={savedInsights} />
 
           <RecommendationsPanel
             jobs={recommendedJobs}
@@ -235,6 +233,13 @@ export function Dashboard() {
                     </div>
                   </div>
                 </div>
+
+                {savedInsights.savedCount > 0 ? (
+                  <InsightsPanel
+                    insights={savedInsights}
+                    title="Your Save Pattern"
+                  />
+                ) : null}
 
                 <JobList
                   isLoading={isLoading}

@@ -393,11 +393,24 @@ button {
 }
 
 .intelligence-panel {
-  margin-top: 22px;
+  margin-top: 18px;
   padding: 18px;
   border: 3px solid #161616;
   background: #fffaf0;
   box-shadow: 6px 6px 0 #161616;
+}
+
+.intelligence-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+
+.intelligence-subtitle {
+  margin: 8px 0 0;
+  color: #5b5647;
+  font-size: 0.92rem;
 }
 
 .insight-stats-grid {
@@ -435,8 +448,9 @@ button {
   list-style: none;
   padding: 0;
   margin: 8px 0 0;
-  display: grid;
+  display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .insight-list li {
@@ -448,6 +462,8 @@ button {
   border: 2px solid #161616;
   background: #fff;
   font-size: 0.85rem;
+  min-width: 180px;
+  flex: 1 1 180px;
 }
 
 .intelligence-empty {
@@ -770,6 +786,10 @@ button {
 
   .insight-stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .insight-list li {
+    min-width: 0;
   }
 }
 

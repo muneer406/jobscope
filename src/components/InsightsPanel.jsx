@@ -23,10 +23,17 @@ function InsightList({ entries, title }) {
   );
 }
 
-export function InsightsPanel({ insights }) {
+export function InsightsPanel({ insights, title = "Saved Insights" }) {
   return (
     <section className="intelligence-panel" aria-label="Saved job insights">
-      <p className="filter-group-label">Saved Insights</p>
+      <div className="intelligence-header">
+        <div>
+          <p className="filter-group-label">{title}</p>
+          <p className="intelligence-subtitle">
+            JobScope is reading the patterns in what you keep.
+          </p>
+        </div>
+      </div>
 
       <div className="insight-stats-grid">
         <article className="insight-stat-card">
@@ -47,6 +54,7 @@ export function InsightsPanel({ insights }) {
 
       <InsightList entries={insights.topTags} title="Top tags" />
       <InsightList entries={insights.topCompanies} title="Top companies" />
+      <InsightList entries={insights.topLocations} title="Top locations" />
     </section>
   );
 }
