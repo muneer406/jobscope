@@ -1,6 +1,7 @@
 import { useJobs } from "../hooks/useJobs";
 import { VIEW_MODES } from "../utils/jobSelectors";
 import { FiltersPanel } from "../components/FiltersPanel";
+import { JobDetailsPanel } from "../components/JobDetailsPanel";
 import { JobList } from "../components/JobList";
 import { SearchBar } from "../components/SearchBar";
 import { ViewToggle } from "../components/ViewToggle";
@@ -29,7 +30,7 @@ export function Dashboard() {
   return (
     <main className="app-shell">
       <section className="hero-panel">
-        <p className="eyebrow">Phase 2</p>
+        <p className="eyebrow">Phase 3</p>
         <h1>JobScope</h1>
         <p className="hero-copy">
           A direct, searchable dashboard for exploring mapped job listings.
@@ -81,14 +82,23 @@ export function Dashboard() {
 
         {error ? <p className="message-banner error-banner">{error}</p> : null}
 
-        <JobList
-          isLoading={isLoading}
-          jobs={visibleJobs}
-          savedJobs={savedJobs}
-          selectedJobId={selectedJob?.id ?? null}
-          viewMode={viewMode}
-          onToggleSavedJob={toggleSavedJob}
-        />
+        <div className="dashboard-content">
+          <JobList
+            isLoading={isLoading}
+            jobs={visibleJobs}
+            savedJobs={savedJobs}
+            selectedJobId={selectedJob?.id ?? null}
+            viewMode={viewMode}
+            onToggleSavedJob={toggleSavedJob}
+          />
+
+          <JobDetailsPanel
+            isLoading={isLoading}
+            isSaved={selectedJob ? savedJobs.includes(selectedJob.id) : false}
+            job={selectedJob}
+            onToggleSavedJob={toggleSavedJob}
+          />
+        </div>
       </section>
     </main>
   );

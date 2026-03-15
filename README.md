@@ -2,8 +2,8 @@
 
 ![React](https://img.shields.io/badge/React-19-blue)
 ![Vite](https://img.shields.io/badge/Vite-7-purple)
-![Tests](https://img.shields.io/badge/tests-113%20passing-brightgreen)
-![Phase](https://img.shields.io/badge/phase-2%20complete-success)
+![Tests](https://img.shields.io/badge/tests-121%20passing-brightgreen)
+![Phase](https://img.shields.io/badge/phase-3%20complete-success)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 A **modern job discovery dashboard** built with React that focuses on **efficient job exploration, filtering, and organization**.
@@ -92,6 +92,7 @@ src
 ├── components
 │   ├── FiltersPanel.jsx  # company / location / tag filters
 │   ├── JobCard.jsx
+│   ├── JobDetailsPanel.jsx
 │   ├── JobList.jsx
 │   ├── SearchBar.jsx
 │   └── ViewToggle.jsx
@@ -201,7 +202,12 @@ This allows users to **quickly scan and inspect jobs without losing context**.
 - "Clear all" button when any filter is active
 - `hasActiveFilters` derived state
 
-### Phase 3 — Job detail panel
+### ✅ Phase 3 — Job detail panel
+
+- Dedicated detail panel for the currently selected job
+- Shows full description, company, location, and tags
+- Save or unsave directly from the detail view
+- Handles loading and empty-selection states cleanly
 
 ### Phase 4 — Keyboard navigation system
 
@@ -240,7 +246,7 @@ npm test          # run once
 npm run test:watch # watch mode
 ```
 
-113 tests across 8 suites covering the API mapper, selectors, all components, hooks, and filter actions.
+121 tests across 9 suites covering the API mapper, selectors, components, hooks, and filter actions.
 
 ---
 

@@ -201,6 +201,13 @@ button {
   margin-top: 22px;
 }
 
+.dashboard-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 22px;
+  align-items: start;
+}
+
 .job-list-item {
   padding: 0;
   border: 0;
@@ -318,6 +325,81 @@ button {
   background: #fff0cc;
 }
 
+.details-panel {
+  margin-top: 22px;
+  padding: 22px;
+  border: 3px solid #161616;
+  background: rgba(255, 250, 240, 0.94);
+  box-shadow: 8px 8px 0 #161616;
+  align-self: start;
+  position: sticky;
+  top: 24px;
+}
+
+.empty-details-panel {
+  background: #fff;
+}
+
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.details-eyebrow,
+.details-section-label,
+.details-meta-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.details-eyebrow {
+  margin-bottom: 10px;
+}
+
+.details-panel h2 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.details-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.details-meta-card {
+  padding: 14px 16px;
+  border: 3px solid #161616;
+  background: #d8ece0;
+  box-shadow: 5px 5px 0 #161616;
+}
+
+.details-meta-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.05rem;
+}
+
+.details-section {
+  margin-top: 24px;
+}
+
+.details-copy {
+  margin: 10px 0 0;
+  color: #303030;
+}
+
+.details-tag-list {
+  margin-top: 12px;
+}
+
 @media (max-width: 960px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -329,6 +411,14 @@ button {
 
   .controls-row {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-content {
+    grid-template-columns: 1fr;
+  }
+
+  .details-panel {
+    position: static;
   }
 
   .view-toggle {
@@ -344,7 +434,8 @@ button {
   .hero-panel,
   .dashboard-panel,
   .feedback-panel,
-  .job-card {
+  .job-card,
+  .details-panel {
     box-shadow: 5px 5px 0 #161616;
   }
 
@@ -355,6 +446,14 @@ button {
 
   .job-card-header {
     flex-direction: column;
+  }
+
+  .details-header {
+    flex-direction: column;
+  }
+
+  .details-meta-grid {
+    grid-template-columns: 1fr;
   }
 }
 
